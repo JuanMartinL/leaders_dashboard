@@ -4,6 +4,8 @@ import plotly.express as px
 import ast
 import pydeck as pdk
 import io
+import folium
+from streamlit_folium import st_folium
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
@@ -79,6 +81,32 @@ with tab1:
     df_ctry.columns = ["País","Cantidad"]
     st.plotly_chart(px.bar(df_ctry, x="País", y="Cantidad", text="Cantidad"), use_container_width=True)
 
+    # Map
+    st.subheader("Distribución Geográfica")
+
+    map_df = leaders.dropna(subset=["Latitude", "Longitude"])
+
+    # Create Folium map centered on average lat/lon
+    m = folium.Map(
+        location=[map_df["Latitude"].mean(), map_df["Longitude"].mean()],
+        zoom_start=3,
+        tiles="CartoDB positron"
+    )
+
+    # Add circle markers
+    for _, row in map_df.iterrows():
+        folium.CircleMarker(
+            location=[row["Latitude"], row["Longitude"]],
+            radius=5,
+            color="crimson",
+            fill=True,
+            fill_opacity=0.7,
+            popup=f"{row['First Name']} {row['Last Name']}"
+        ).add_to(m)
+
+    # Render map in Streamlit
+    st_folium(m, width=800, height=500)
+
     st.subheader("Leads por Categoría")
     df_cat = filtered["Category"].value_counts().reset_index()
     df_cat.columns = ["Categoría","Cantidad"]
@@ -106,29 +134,6 @@ with tab1:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    st.subheader("Distribución Geográfica")
-
-    map_df = leaders.dropna(subset=["Latitude", "Longitude"])
-
-    st.pydeck_chart(pdk.Deck(
-        map_style="mapbox://styles/mapbox/light-v9",
-        initial_view_state=pdk.ViewState(
-            latitude=map_df["Latitude"].mean(),
-            longitude=map_df["Longitude"].mean(),
-            zoom=3,
-            pitch=0,
-        ),
-        layers=[
-            pdk.Layer(
-                "ScatterplotLayer",
-                data=map_df,
-                get_position='[Longitude, Latitude]',
-                get_radius=30000,
-                get_fill_color='[200, 30, 0, 160]',
-                pickable=True,
-            )
-        ],
-    ))
 
 with tab2:
     st.markdown("## Viewer")
