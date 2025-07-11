@@ -26,8 +26,8 @@ st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
 st.title("CESA • LATAM Leaders & Influencers")
 
 # Logos en el sidebar
-logo_cesa = Image.open("assets/cesa_logo.png")      # Ruta relativa al archivo
-logo_datad = Image.open("assets/Logo.jpeg")
+logo_cesa = Image.open("datain/cesa_logo.png")      # Ruta relativa al archivo
+logo_datad = Image.open("datain/Logo.jpeg")
 
 with st.sidebar:
     st.image(logo_cesa, caption="Cliente: CESA", use_column_width=True)
