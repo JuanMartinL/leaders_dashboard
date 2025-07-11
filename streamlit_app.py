@@ -63,8 +63,8 @@ with st.sidebar:
                             color: grey;
                         }
                         .powered-container img {
-                            height: 40px;
-                            width: 40px;
+                            height: 50px;
+                            width: 50px;
                             margin-bottom: -2px;
                             border-radius: 50%; /* 🎯 Esto lo convierte en un círculo */
                             object-fit: cover;
