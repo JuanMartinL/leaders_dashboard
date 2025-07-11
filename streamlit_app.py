@@ -255,8 +255,20 @@ with tab2:
     st.markdown("## Visor de Líderes")
     st.markdown("Selecciona un lead para ver su perfil completo y decidir su pertinencia para conferencias, programas académicos o alianzas.")
 
+    # Crear nombres completos
     names = leaders["First Name"] + " " + leaders["Last Name"]
-    sel_person = st.selectbox("Elegir persona", options=sorted(names.unique()))
+
+    # Input de búsqueda
+    busqueda = st.text_input("Buscar persona")
+
+    # Filtrar por nombre que contenga lo buscado (insensible a mayúsculas)
+    if busqueda:
+        nombres_filtrados = names[names.str.lower().str.contains(busqueda.lower())].unique()
+    else:
+        nombres_filtrados = names.unique()
+
+    # Selectbox con nombres filtrados
+    sel_person = st.selectbox("Elegir persona", options=sorted(nombres_filtrados))
 
     person = leaders[names == sel_person].iloc[0]
 
