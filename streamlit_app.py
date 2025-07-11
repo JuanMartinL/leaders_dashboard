@@ -107,14 +107,16 @@ with tab1:
     # Render map in Streamlit
     st.subheader("Distribución Geográfica (Bubble Map por País)")
 
-    # Filter and group data
-    map_df = leaders.dropna(subset=["Latitude", "Longitude"])
+    # Use the already-filtered DataFrame
+    map_df = filtered.dropna(subset=["Latitude", "Longitude"])
+
+    # Group by Country + Lat/Lon
     grouped = map_df.groupby(["Person Country", "Latitude", "Longitude"]).size().reset_index(name="Count")
 
-    # Normalize bubble size (log or sqrt scale helps for visual clarity)
+    # Optional: scale radius using power or log
     grouped["Bubble Size"] = grouped["Count"].apply(lambda x: max(6, min(50, x**0.8)))
 
-    # Create Folium map
+    # Create the map centered on the filtered data
     m = folium.Map(
         location=[grouped["Latitude"].mean(), grouped["Longitude"].mean()],
         zoom_start=3,
@@ -133,7 +135,7 @@ with tab1:
             popup=f"{row['Person Country']}: {row['Count']} personas"
         ).add_to(m)
 
-    # Display
+    # Display map in full width
     st_folium(m, width="100%", height=500)
 
     # Download buttom
