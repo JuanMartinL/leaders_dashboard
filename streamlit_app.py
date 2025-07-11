@@ -97,24 +97,52 @@ with tab1:
     st.download_button("📥 Descargar CSV", data=csv, file_name="cesa_leads.csv")
 
 with tab2:
-    st.markdown("## CV Viewer\nSelecciona un lead para ver su ficha completa estilo currículum.")
-    # Selector de persona
+    st.markdown("## 📇 CV Viewer")
+    st.markdown("Selecciona un lead para ver su perfil completo y decidir su pertinencia para conferencias, programas académicos o alianzas.")
+
+    # Select person
     names = leaders["First Name"] + " " + leaders["Last Name"]
-    sel_person = st.selectbox("Elegir persona", options=names)
+    sel_person = st.selectbox("🔍 Elegir persona", options=sorted(names.unique()))
 
-    # Mostrar datos
+    # Retrieve selected
     person = leaders[names == sel_person].iloc[0]
-    st.markdown(f"### {person['First Name']} {person['Last Name']}")
-    st.markdown(f"**Título actual:** {person['Current Title']}")
-    st.markdown(f"**Categoría:** {person['Category']}")
-    st.markdown(f"**Roles principales:** {', '.join(person['Main Titles'])}")
-    st.markdown(f"**Industria:** {person['Industry']}")
-    st.markdown(f"**País:** {person['Person Country']}")
-    st.markdown(f"**Seguidores:** {person['Followers']:,}")
-    st.markdown(f"**LinkedIn:** [{person['Person Linkedin Url']}]({person['Person Linkedin Url']})")
 
-    st.markdown("**Biografía completa:**")
-    st.write(person["Bio"])
+    # Layout: two columns
+    left, right = st.columns([1, 3])
 
-    if "Contact Email" in person:
-        st.markdown(f"**Email de contacto:** {person['Contact Email']}")
+    # LEFT: profile picture & contact
+    with left:
+        #if "Profile_Pic_URL" in person and pd.notna(person["Profile_Pic_URL"]):
+        #    st.image(person["Profile_Pic_URL"], width=160)
+        #else:
+        #    st.image("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png", width=160)
+
+        st.markdown(f"**Seguidores:** {int(person['Followers']):,}" if not pd.isna(person['Followers']) else "**Seguidores:** N/A")
+        if "Contact Email" in person and pd.notna(person["Contact Email"]):
+            st.markdown(f"📧 **Email:** {person['Contact Email']}")
+        if pd.notna(person["Person Linkedin Url"]):
+            st.markdown(f"[🔗 Ver en LinkedIn]({person['Person Linkedin Url']})", unsafe_allow_html=True)
+
+    # RIGHT: main content
+    with right:
+        st.markdown(f"### {person['First Name']} {person['Last Name']}")
+        st.markdown(f"**{person['Current Title']}**")
+        st.markdown(" ")
+
+        tags = []
+        if isinstance(person["Main Titles"], list):
+            tags.extend(person["Main Titles"])
+        if pd.notna(person["Category"]):
+            tags.append(f"🧠 {person['Category']}")
+        if pd.notna(person["Industry"]):
+            tags.append(f"🏢 {person['Industry']}")
+        if pd.notna(person["Person Country"]):
+            tags.append(f"🌎 {person['Person Country']}")
+
+        st.markdown("**Áreas clave:**")
+        st.markdown(" | ".join(tags))
+
+        st.markdown("**Biografía:**")
+        st.info(person["Bio"] if pd.notna(person["Bio"]) else "No hay biografía disponible.")
+
+    st.markdown("---")
