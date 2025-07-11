@@ -85,7 +85,10 @@ with tab1:
     st.subheader("Distribución Geográfica")
 
     with st.container():
-        map_df = leaders.dropna(subset=["Latitude", "Longitude"])
+        map_df = leaders.dropna(subset=["Latitude", "Longitude", "Followers"]).copy()
+
+        # Normalize bubble sizes (log scale to prevent dominance by high values)
+        map_df["Bubble Size"] = map_df["Followers"].apply(lambda x: max(5, min(50, x**0.5)))
 
         m = folium.Map(
             location=[map_df["Latitude"].mean(), map_df["Longitude"].mean()],
@@ -97,42 +100,26 @@ with tab1:
         for _, row in map_df.iterrows():
             folium.CircleMarker(
                 location=[row["Latitude"], row["Longitude"]],
-                radius=5,
+                radius=row["Bubble Size"],
                 color="crimson",
                 fill=True,
-                fill_opacity=0.7,
-                popup=f"{row['First Name']} {row['Last Name']}"
+                fill_opacity=0.6,
+                popup=f"{row['First Name']} {row['Last Name']}<br>Followers: {int(row['Followers']):,}",
             ).add_to(m)
 
-        # Make map fill container horizontally and reduce vertical space after
         st_folium(m, width="100%", height=500)
 
-    st.subheader("Leads por Categoría")
-    df_cat = filtered["Category"].value_counts().reset_index()
-    df_cat.columns = ["Categoría","Cantidad"]
-    st.plotly_chart(px.pie(df_cat, names="Categoría", values="Cantidad"), use_container_width=True)
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            filtered.to_excel(writer, index=False)
+        output.seek(0)
 
-    # Data table & download
-    st.subheader("Detalles de Leads")
-    st.dataframe(
-        filtered[[
-            "First Name","Last Name","Category","Main Titles",
-            "Industry","Person Country","Followers","Person Linkedin Url"
-        ]],
-        height=400
-    )
-
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        filtered.to_excel(writer, index=False)
-    output.seek(0)
-
-    st.download_button(
-        label="Descargar Excel",
-        data=output,
-        file_name="cesa_leads.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+        st.download_button(
+            label="Descargar Excel",
+            data=output,
+            file_name="cesa_leads.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 
 with tab2:
