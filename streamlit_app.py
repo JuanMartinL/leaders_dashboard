@@ -45,11 +45,10 @@ with st.sidebar:
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="logo-container">', use_container_width =True)
+    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
     st.image(logo_cesa, use_container_width =True)
-
     st.image(logo_datad, use_container_width =True)
-    st.markdown("</div>", use_container_width =True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<p style="text-align:center; font-size: 0.75rem; margin-top: 0.5rem; color: grey;">Powered by DataD</p>', unsafe_allow_html=True)
 # ---------------------------------------------------
