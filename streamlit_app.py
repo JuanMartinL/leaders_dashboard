@@ -13,7 +13,7 @@ from PIL import Image
 import base64
 from io import BytesIO
 
-show_network = False
+show_network = True
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
