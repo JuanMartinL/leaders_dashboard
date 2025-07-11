@@ -30,7 +30,7 @@ st.title("CESA • LATAM Leaders & Influencers")
 # Logos
 # Cargar imágenes
 logo_cesa = Image.open("datain/cesa_logo.png")
-icon_datad = Image.open("datain/logo.png")  # este es el nuevo ícono de DataD
+icon_datad = Image.open("datain/Logo.png")  # este es el nuevo ícono de DataD
 
 
 # Convertir ícono a base64 para insertarlo como imagen HTML
