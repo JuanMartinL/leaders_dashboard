@@ -71,7 +71,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-    st.image(logo_cesa, use_column_width=True)
+    st.image(logo_cesa, use_container_width =True)
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown(
