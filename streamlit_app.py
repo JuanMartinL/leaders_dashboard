@@ -4,7 +4,7 @@ import plotly.express as px
 import ast
 
 @st.cache_data
-def load_data(path: str = "scrap_leaders.xlsx") -> pd.DataFrame:
+def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
     df = pd.read_excel(path)
     # Reconstruir listas si vienen serializadas
     if df["Main Titles"].dtype == object:
