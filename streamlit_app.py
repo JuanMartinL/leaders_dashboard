@@ -297,33 +297,37 @@ with tab2:
 
     st.markdown("---")
 
-with tab3:
-    st.subheader("Matriz de Red: Conexiones entre Perfiles")
 
-    # Limitar a los primeros 50 para rendimiento
-    subset = filtered.head(50)
+show_network = False
 
-    # Construir grafo
-    G = nx.Graph()
-    for idx, row in subset.iterrows():
-        name = f"{row['First Name']} {row['Last Name']}"
-        G.add_node(idx, label=name, title=name)
+if show_network:
+    with tab3:
+        st.subheader("Matriz de Red: Conexiones entre Perfiles")
 
-    # Añadir aristas si comparten algún Main Title
-    for i in subset.index:
-        for j in subset.index:
-            if j <= i: continue
-            roles_i = set(subset.loc[i, 'Main Titles']) if isinstance(subset.loc[i, 'Main Titles'], list) else set()
-            roles_j = set(subset.loc[j, 'Main Titles']) if isinstance(subset.loc[j, 'Main Titles'], list) else set()
-            if roles_i & roles_j:
-                G.add_edge(i, j)
+        # Limitar a los primeros 50 para rendimiento
+        subset = filtered.head(50)
 
-    # Generar red con PyVis
-    net = Network(height='600px', width='100%', notebook=False)
-    net.from_nx(G)
+        # Construir grafo
+        G = nx.Graph()
+        for idx, row in subset.iterrows():
+            name = f"{row['First Name']} {row['Last Name']}"
+            G.add_node(idx, label=name, title=name)
 
-    # Mostrar la red en HTML
-    path = 'network.html'
-    net.write_html(path, open_browser=False)
-    with open(path, 'r', encoding='utf-8') as HtmlFile:
-        components.html(HtmlFile.read(), height=650)
+        # Añadir aristas si comparten algún Main Title
+        for i in subset.index:
+            for j in subset.index:
+                if j <= i: continue
+                roles_i = set(subset.loc[i, 'Main Titles']) if isinstance(subset.loc[i, 'Main Titles'], list) else set()
+                roles_j = set(subset.loc[j, 'Main Titles']) if isinstance(subset.loc[j, 'Main Titles'], list) else set()
+                if roles_i & roles_j:
+                    G.add_edge(i, j)
+
+        # Generar red con PyVis
+        net = Network(height='600px', width='100%', notebook=False)
+        net.from_nx(G)
+
+        # Mostrar la red en HTML
+        path = 'network.html'
+        net.write_html(path, open_browser=False)
+        with open(path, 'r', encoding='utf-8') as HtmlFile:
+            components.html(HtmlFile.read(), height=650)
