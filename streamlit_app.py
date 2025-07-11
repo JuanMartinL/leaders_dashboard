@@ -132,32 +132,12 @@ with tab1:
     # Display map in full width
     st_folium(m, width="100%", height=500)
 
-    # Donut chart: Categories
+    # Leads por categoria
     st.subheader("Leads por Categoría")
-    cat_counts = filtered["Category"].value_counts().reset_index()
-    cat_counts.columns = ["Categoría", "Cantidad"]
-    fig_cat = px.pie(
-        cat_counts,
-        names="Categoría",
-        values="Cantidad",
-        hole=0.4,
-        title=None
-    )
-    st.plotly_chart(fig_cat, use_container_width=True)
+    df_cat = filtered["Category"].value_counts().reset_index()
+    df_cat.columns = ["Categoría","Cantidad"]
+    st.plotly_chart(px.pie(df_cat, names="Categoría", values="Cantidad"), use_container_width=True)
 
-    # Donut chart: Industries
-    st.subheader("Leads por Industria")
-    ind_counts = filtered["Industry"].value_counts().reset_index()
-    ind_counts.columns = ["Industria", "Cantidad"]
-    fig_ind = px.pie(
-        ind_counts,
-        names="Industria",
-        values="Cantidad",
-        hole=0.4,
-        title=None
-    )
-    
-    st.plotly_chart(fig_ind, use_container_width=True)
     # — Data table & download —
     st.subheader("Detalles de Leads")
     st.dataframe(
