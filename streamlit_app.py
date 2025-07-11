@@ -17,7 +17,6 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
 
 leaders = load_data()
 
-
 st.set_page_config(page_title="CESA Leads Dashboard", layout="wide")
 st.title("CESA University • LATAM Leaders & Influencers")
 
@@ -28,8 +27,9 @@ tab1, tab2 = st.tabs(["Dashboard", "CV Viewer"])
 
 with tab1:
     st.markdown("**Explora y filtra tus leads** para programas, conferencias y alianzas.")
-    # — Sidebar Filters (mismo código que antes) —
-    st.sidebar.header("🔎 Filtros")
+    
+    # Sidebar Filters
+    st.sidebar.header("Filtros")
     cats   = sorted(leaders["Category"].dropna().unique())
     sel_cat = st.sidebar.multiselect("Clasificación", options=cats, default=cats)
     titles = sorted({r for roles in leaders["Main Titles"] for r in roles})
@@ -60,23 +60,20 @@ with tab1:
 
     filtered = filter_df(leaders)
 
-    # — Key metrics —
+    # Key metrics
     total_leads = len(filtered)
     categories_count = filtered["Category"].nunique()
     industries_count = filtered["Industry"].nunique()
     mean_followers = filtered["Followers"].mean()
-
-    # Controlar NaN
     followers_display = "0" if pd.isna(mean_followers) else f"{int(mean_followers):,}"
 
-    # Mostrar métricas
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total leads", total_leads)
     col2.metric("Categorías", categories_count)
     col3.metric("Industrias", industries_count)
     col4.metric("Prom. seguidores", followers_display)
 
-    # — Charts —
+    # Charts
     st.subheader("Distribución por País")
     df_ctry = filtered["Person Country"].value_counts().reset_index()
     df_ctry.columns = ["País","Cantidad"]
@@ -87,7 +84,7 @@ with tab1:
     df_cat.columns = ["Categoría","Cantidad"]
     st.plotly_chart(px.pie(df_cat, names="Categoría", values="Cantidad"), use_container_width=True)
 
-    # — Data table & download —
+    # Data table & download
     st.subheader("Detalles de Leads")
     st.dataframe(
         filtered[[
@@ -96,17 +93,12 @@ with tab1:
         ]],
         height=400
     )
-    # Create a BytesIO buffer
-    output = io.BytesIO()
 
-    # Write the DataFrame to this buffer as Excel
+    output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         filtered.to_excel(writer, index=False)
-
-    # Rewind the buffer
     output.seek(0)
 
-    # Download button
     st.download_button(
         label="Descargar Excel",
         data=output,
@@ -114,7 +106,7 @@ with tab1:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-    st.subheader("🌍 Distribution Map")
+    st.subheader("Distribución Geográfica")
 
     map_df = leaders.dropna(subset=["Latitude", "Longitude"])
 
@@ -142,30 +134,25 @@ with tab2:
     st.markdown("## Viewer")
     st.markdown("Selecciona un lead para ver su perfil completo y decidir su pertinencia para conferencias, programas académicos o alianzas.")
 
-    # Select person
     names = leaders["First Name"] + " " + leaders["Last Name"]
-    sel_person = st.selectbox("🔍 Elegir persona", options=sorted(names.unique()))
+    sel_person = st.selectbox("Elegir persona", options=sorted(names.unique()))
 
-    # Retrieve selected
     person = leaders[names == sel_person].iloc[0]
 
-    # Layout: two columns
     left, right = st.columns([1, 3])
 
-    # LEFT: profile picture & contact
     with left:
-        #if "Profile_Pic_URL" in person and pd.notna(person["Profile_Pic_URL"]):
-        #    st.image(person["Profile_Pic_URL"], width=160)
-        #else:
-        #    st.image("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png", width=160)
+        # if "Profile_Pic_URL" in person and pd.notna(person["Profile_Pic_URL"]):
+        #     st.image(person["Profile_Pic_URL"], width=160)
+        # else:
+        #     st.image("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png", width=160)
 
         st.markdown(f"**Seguidores:** {int(person['Followers']):,}" if not pd.isna(person['Followers']) else "**Seguidores:** N/A")
         if "Contact Email" in person and pd.notna(person["Contact Email"]):
-            st.markdown(f"📧 **Email:** {person['Contact Email']}")
+            st.markdown(f"Email: {person['Contact Email']}")
         if pd.notna(person["Person Linkedin Url"]):
-            st.markdown(f"[🔗 Ver en LinkedIn]({person['Person Linkedin Url']})", unsafe_allow_html=True)
+            st.markdown(f"[Ver en LinkedIn]({person['Person Linkedin Url']})", unsafe_allow_html=True)
 
-    # RIGHT: main content
     with right:
         st.markdown(f"### {person['First Name']} {person['Last Name']}")
         st.markdown(f"**{person['Current Title']}**")
@@ -175,11 +162,11 @@ with tab2:
         if isinstance(person["Main Titles"], list):
             tags.extend(person["Main Titles"])
         if pd.notna(person["Category"]):
-            tags.append(f"🧠 {person['Category']}")
+            tags.append(person["Category"])
         if pd.notna(person["Industry"]):
-            tags.append(f"🏢 {person['Industry']}")
+            tags.append(person["Industry"])
         if pd.notna(person["Person Country"]):
-            tags.append(f"🌎 {person['Person Country']}")
+            tags.append(person["Person Country"])
 
         st.markdown("**Áreas clave:**")
         st.markdown(" | ".join(tags))
