@@ -57,14 +57,14 @@ with st.sidebar:
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                gap: 6px;
-                margin-top: -8px;
-                font-size: 10px;
+                gap: 8px;
+                margin-top: -10px;
+                font-size: 11px;
                 color: grey;
             }
             .powered-container img {
-                height: 14px;
-                width: 14px;
+                height: 20px;
+                width: 20px;
                 margin-bottom: -2px;
             }
         </style>
