@@ -63,8 +63,8 @@ with st.sidebar:
                 color: grey;
             }
             .powered-container img {
-                height: 20px;
-                width: 20px;
+                height: 40px;
+                width: 40px;
                 margin-bottom: -2px;
             }
         </style>
