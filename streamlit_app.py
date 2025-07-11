@@ -22,8 +22,8 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
     return df
 
 leaders = load_data()
-logo_cesa = Image.open("assets/cesa_logo.png")  # Asegúrate que estén en esta carpeta
-logo_datad = Image.open("assets/Logo.jpeg")
+logo_cesa = Image.open("datain/cesa_logo.png")  # Asegúrate que estén en esta carpeta
+logo_datad = Image.open("datain/Logo.jpeg")
 
 st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
 st.title("CESA • LATAM Leaders & Influencers")
