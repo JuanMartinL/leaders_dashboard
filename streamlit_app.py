@@ -22,8 +22,17 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
 
 leaders = load_data()
 
-st.set_page_config(page_title="CESA Leads Dashboard", layout="wide")
-st.title("CESA University • LATAM Leaders & Influencers")
+st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
+st.title("CESA • LATAM Leaders & Influencers")
+
+# Header: Cliente (CESA) y Desarrollador (DataD)
+col_logo_cliente, col_title, col_logo_dev = st.columns([1,4,1])
+with col_logo_cliente:
+    st.image("cesa_logo.png", width=80)
+with col_title:
+    st.markdown("# CESA University • LATAM Leaders & Influencers")
+with col_logo_dev:
+    st.image("Logo.jpeg", width=80)
 
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
