@@ -5,7 +5,7 @@ import plotly.express as px
 @st.cache_data
 def load_data():
     # Load LinkedIn leads data
-    df = pd.read_excel('datain/Entrepreneur 650 leads .xlsx')
+    df = pd.read_excel('datain/scrap_leaders.xlsx')
     return df
 
 df = load_data()
