@@ -28,7 +28,7 @@ st.title("CESA University • LATAM Leaders & Influencers")
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["Dashboard", "CV Viewer", "Network"])
+tab1, tab2, tab3 = st.tabs(["Estadísticas Generales", "Visor de Líderes", "Network"])
 
 with tab1:
     st.markdown("**Explora y filtra tus leads** para programas, conferencias y alianzas.")
@@ -190,7 +190,7 @@ with tab1:
 
 
 with tab2:
-    st.markdown("## Viewer")
+    st.markdown("## Visor de Líderes")
     st.markdown("Selecciona un lead para ver su perfil completo y decidir su pertinencia para conferencias, programas académicos o alianzas.")
 
     names = leaders["First Name"] + " " + leaders["Last Name"]
@@ -237,9 +237,6 @@ with tab2:
 
 with tab3:
     st.subheader("Matriz de Red: Conexiones entre Perfiles")
-    import networkx as nx
-    from pyvis.network import Network
-    import streamlit.components.v1 as components
 
     # 1. Filtro de roles
     all_roles = sorted({r for roles in filtered["Main Titles"] for r in roles})
