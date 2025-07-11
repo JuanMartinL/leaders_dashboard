@@ -84,42 +84,70 @@ with tab1:
     # Map
     st.subheader("Distribución Geográfica")
 
-    with st.container():
-        map_df = leaders.dropna(subset=["Latitude", "Longitude", "Followers"]).copy()
+    map_df = leaders.dropna(subset=["Latitude", "Longitude"])
 
-        # Normalize bubble sizes (log scale to prevent dominance by high values)
-        map_df["Bubble Size"] = map_df["Followers"].apply(lambda x: max(5, min(50, x**0.5)))
+    # Create Folium map centered on average lat/lon
+    m = folium.Map(
+        location=[map_df["Latitude"].mean(), map_df["Longitude"].mean()],
+        zoom_start=3,
+        tiles="CartoDB positron"
+    )
 
-        m = folium.Map(
-            location=[map_df["Latitude"].mean(), map_df["Longitude"].mean()],
-            zoom_start=3,
-            tiles="CartoDB positron",
-            control_scale=True
-        )
+    # Add circle markers
+    for _, row in map_df.iterrows():
+        folium.CircleMarker(
+            location=[row["Latitude"], row["Longitude"]],
+            radius=5,
+            color="crimson",
+            fill=True,
+            fill_opacity=0.7,
+            popup=f"{row['First Name']} {row['Last Name']}"
+        ).add_to(m)
 
-        for _, row in map_df.iterrows():
-            folium.CircleMarker(
-                location=[row["Latitude"], row["Longitude"]],
-                radius=row["Bubble Size"],
-                color="crimson",
-                fill=True,
-                fill_opacity=0.6,
-                popup=f"{row['First Name']} {row['Last Name']}<br>Followers: {int(row['Followers']):,}",
-            ).add_to(m)
+    # Render map in Streamlit
+    st.subheader("Distribución Geográfica (Bubble Map por País)")
 
-        st_folium(m, width="100%", height=500)
+    # Filter and group data
+    map_df = leaders.dropna(subset=["Latitude", "Longitude"])
+    grouped = map_df.groupby(["Person Country", "Latitude", "Longitude"]).size().reset_index(name="Count")
 
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            filtered.to_excel(writer, index=False)
-        output.seek(0)
+    # Normalize bubble size (log or sqrt scale helps for visual clarity)
+    grouped["Bubble Size"] = grouped["Count"].apply(lambda x: max(6, min(50, x**0.8)))
 
-        st.download_button(
-            label="Descargar Excel",
-            data=output,
-            file_name="cesa_leads.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+    # Create Folium map
+    m = folium.Map(
+        location=[grouped["Latitude"].mean(), grouped["Longitude"].mean()],
+        zoom_start=3,
+        tiles="CartoDB positron",
+        control_scale=True
+    )
+
+    # Add bubbles
+    for _, row in grouped.iterrows():
+        folium.CircleMarker(
+            location=[row["Latitude"], row["Longitude"]],
+            radius=row["Bubble Size"],
+            color="crimson",
+            fill=True,
+            fill_opacity=0.6,
+            popup=f"{row['Person Country']}: {row['Count']} personas"
+        ).add_to(m)
+
+    # Display
+    st_folium(m, width="100%", height=500)
+
+    # Download buttom
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        filtered.to_excel(writer, index=False)
+    output.seek(0)
+
+    st.download_button(
+        label="Descargar Excel",
+        data=output,
+        file_name="cesa_leads.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 with tab2:
