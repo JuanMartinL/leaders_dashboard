@@ -28,7 +28,7 @@ st.title("CESA University • LATAM Leaders & Influencers")
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["Estadísticas Generales", "Visor de Líderes", "Network"])
+tab1, tab2, tab3 = st.tabs(["Dashboard", "CV Viewer", "Network"])
 
 with tab1:
     st.markdown("**Explora y filtra tus leads** para programas, conferencias y alianzas.")
@@ -190,7 +190,7 @@ with tab1:
 
 
 with tab2:
-    st.markdown("## Visor de Líderes")
+    st.markdown("## Viewer")
     st.markdown("Selecciona un lead para ver su perfil completo y decidir su pertinencia para conferencias, programas académicos o alianzas.")
 
     names = leaders["First Name"] + " " + leaders["Last Name"]
@@ -236,62 +236,32 @@ with tab2:
     st.markdown("---")
 
 with tab3:
-    st.subheader("Matriz de Red: Top Conectados")
+    st.subheader("Matriz de Red: Conexiones entre Perfiles")
 
-    import networkx as nx
-    from pyvis.network import Network
-    import streamlit.components.v1 as components
-    from itertools import combinations
-    from collections import defaultdict
+    # Limitar a los primeros 50 para rendimiento
+    subset = filtered.head(50)
 
-    # Preparar nodos
-    sub = filtered.copy()
-    sub["Full Name"] = sub["First Name"] + " " + sub["Last Name"]
-    sub = sub.dropna(subset=["Main Titles"])
-    sub = sub.reset_index(drop=True)
-
-    # Construir red de co-ocurrencia por rol
-    edges = defaultdict(int)
-    name_roles = list(zip(sub["Full Name"], sub["Main Titles"]))
-    for (name1, roles1), (name2, roles2) in combinations(name_roles, 2):
-        if set(roles1) & set(roles2):
-            edges[(name1, name2)] += 1
-
-    # Crear grafo
+    # Construir grafo
     G = nx.Graph()
-    for name in sub["Full Name"]:
-        G.add_node(name)
-    for (n1, n2), w in edges.items():
-        G.add_edge(n1, n2, weight=w)
+    for idx, row in subset.iterrows():
+        name = f"{row['First Name']} {row['Last Name']}"
+        G.add_node(idx, label=name, title=name)
 
-    # Filtrar top N por centralidad
-    deg = nx.degree_centrality(G)
-    top_n = 50
-    top_nodes = sorted(deg, key=deg.get, reverse=True)[:top_n]
-    G = G.subgraph(top_nodes).copy()
+    # Añadir aristas si comparten algún Main Title
+    for i in subset.index:
+        for j in subset.index:
+            if j <= i: continue
+            roles_i = set(subset.loc[i, 'Main Titles']) if isinstance(subset.loc[i, 'Main Titles'], list) else set()
+            roles_j = set(subset.loc[j, 'Main Titles']) if isinstance(subset.loc[j, 'Main Titles'], list) else set()
+            if roles_i & roles_j:
+                G.add_edge(i, j)
 
-    # Crear red PyVis
-    net = Network(height="600px", width="100%", notebook=False)
-    net.set_options('''
-    {
-    "physics": {
-        "repulsion": {
-        "centralGravity": 0.1,
-        "springLength": 100,
-        "springConstant": 0.01,
-        "nodeDistance": 200,
-        "damping": 0.1
-        },
-        "solver": "repulsion"
-    }
-    }
-    ''')
-    for n in G.nodes:
-        net.add_node(n, label=n)
-    for u, v, d in G.edges(data=True):
-        net.add_edge(u, v, value=d["weight"])
+    # Generar red con PyVis
+    net = Network(height='600px', width='100%', notebook=False)
+    net.from_nx(G)
 
-    # Exportar y mostrar
-    net.write_html("network.html")
-    with open("network.html", "r", encoding="utf-8") as f:
-        components.html(f.read(), height=600)
+    # Mostrar la red en HTML
+    path = 'network.html'
+    net.write_html(path, open_browser=False)
+    with open(path, 'r', encoding='utf-8') as HtmlFile:
+        components.html(HtmlFile.read(), height=650)
