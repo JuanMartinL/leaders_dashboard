@@ -6,6 +6,9 @@ import pydeck as pdk
 import io
 import folium
 from streamlit_folium import st_folium
+import networkx as nx
+from pyvis.network import Network
+import streamlit.components.v1 as components
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
@@ -234,9 +237,6 @@ with tab2:
 
 with tab3:
     st.subheader("Matriz de Red: Conexiones entre Perfiles")
-    import networkx as nx
-    from pyvis.network import Network
-    import streamlit.components.v1 as components
 
     # Limitar a los primeros 50 para rendimiento
     subset = filtered.head(50)
@@ -262,6 +262,6 @@ with tab3:
 
     # Mostrar la red en HTML
     path = 'network.html'
-    net.show(path)
-    HtmlFile = open(path, 'r', encoding='utf-8')
-    components.html(HtmlFile.read(), height=650)
+    net.write_html(path, open_browser=False)
+    with open(path, 'r', encoding='utf-8') as HtmlFile:
+        components.html(HtmlFile.read(), height=650)
