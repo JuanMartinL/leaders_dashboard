@@ -138,6 +138,22 @@ with tab1:
     # Display map in full width
     st_folium(m, width="100%", height=500)
 
+    # Leads por categoria
+    st.subheader("Leads por Categoría")
+    df_cat = filtered["Category"].value_counts().reset_index()
+    df_cat.columns = ["Categoría","Cantidad"]
+    st.plotly_chart(px.pie(df_cat, names="Categoría", values="Cantidad"), use_container_width=True)
+
+    # — Data table & download —
+    st.subheader("Detalles de Leads")
+    st.dataframe(
+        filtered[[
+            "First Name","Last Name","Category","Main Titles",
+            "Industry","Person Country","Followers","Person Linkedin Url"
+        ]],
+        height=400
+    )
+
     # Download buttom
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
