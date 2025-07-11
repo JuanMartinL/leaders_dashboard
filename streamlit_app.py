@@ -30,7 +30,7 @@ logo_cesa = Image.open("datain/cesa_logo.png")      # Ruta relativa al archivo
 logo_datad = Image.open("datain/Logo.jpeg")
 
 with st.sidebar:
-    st.image(logo_cesa, caption="Cliente: CESA", use_container_width =True)
+    st.image(logo_cesa, use_container_width =True)
     st.image(logo_datad, caption="Powered by DataD", use_container_width =True)
 
 # ---------------------------------------------------
