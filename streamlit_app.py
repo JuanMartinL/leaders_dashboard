@@ -26,7 +26,7 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
 leaders = load_data()
 
 st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
-st.title("CESA • LATAM Leaders & Influencers")
+st.title("CESA • Visor de Líderes de LATAM")
 
 # Logos
 # Cargar imágenes
