@@ -25,32 +25,41 @@ leaders = load_data()
 st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
 st.title("CESA • LATAM Leaders & Influencers")
 
-# Logos en el sidebar
-logo_cesa = Image.open("datain/cesa_logo.png")      # Ruta relativa al archivo
-logo_datad = Image.open("datain/Logo.jpeg")
+# Logos
+logo_cesa = Image.open("assets/cesa_logo.png")
+logo_datad = Image.open("assets/Logo.jpeg")
 
 with st.sidebar:
     st.markdown("""
         <style>
             .logo-container img {
-                margin-bottom: 0px !important;
+                margin: 0px !important;
                 padding: 0px !important;
                 background: none !important;
                 border-radius: 0px !important;
                 box-shadow: none !important;
             }
             .css-1v0mbdj.e115fcil1 {
-                padding: 1rem 0.5rem 0.5rem 0.5rem;
+                padding-top: 0rem;
+                padding-bottom: 0rem;
+            }
+            .powered-text {
+                text-align: center;
+                font-size: 10px;
+                margin-top: -6px;
+                color: grey;
             }
         </style>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-    st.image(logo_cesa, use_container_width =True)
-    st.image(logo_datad, use_container_width =True)
+    st.image(logo_cesa, use_column_width=True)
+    st.image(logo_datad, use_column_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<p style="text-align:center; font-size: 0.75rem; margin-top: 0.5rem; color: grey;">Powered by DataD</p>', unsafe_allow_html=True)
+    st.markdown('<div class="powered-text">Powered by DataD</div>', unsafe_allow_html=True)
+   
+   
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
