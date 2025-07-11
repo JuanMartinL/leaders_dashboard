@@ -272,20 +272,20 @@ with tab3:
 
     # Crear red PyVis
     net = Network(height="600px", width="100%", notebook=False)
-    net.set_options("""
-        var options = {
-          physics: {
-            repulsion: {
-              centralGravity: 0.1,
-              springLength: 100,
-              springConstant: 0.01,
-              nodeDistance: 200,
-              damping: 0.1
-            },
-            solver: 'repulsion'
-          }
-        }
-    """)
+    net.set_options('''
+    {
+    "physics": {
+        "repulsion": {
+        "centralGravity": 0.1,
+        "springLength": 100,
+        "springConstant": 0.01,
+        "nodeDistance": 200,
+        "damping": 0.1
+        },
+        "solver": "repulsion"
+    }
+    }
+    ''')
     for n in G.nodes:
         net.add_node(n, label=n)
     for u, v, d in G.edges(data=True):
