@@ -93,7 +93,7 @@ with st.sidebar:
 tab1, tab2, tab3 = st.tabs(["Estadísticas Generales", "Visor de Líderes", "Network"])
 
 with tab1:
-    st.markdown("**Explora y filtra tus leads** para programas, conferencias y alianzas.")
+    st.markdown("**Explora y filtra los líderes** para programas, conferencias y alianzas.")
     
     # Sidebar Filters
     st.sidebar.header("Filtros")
@@ -135,7 +135,7 @@ with tab1:
     followers_display = "0" if pd.isna(mean_followers) else f"{int(mean_followers):,}"
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total leads", total_leads)
+    col1.metric("Total líderes", total_leads)
     col2.metric("Categorías", categories_count)
     col3.metric("Industrias", industries_count)
     col4.metric("Prom. seguidores", followers_display)
@@ -202,7 +202,7 @@ with tab1:
 
     # Donut Charts
     with chart_col1:
-        st.subheader("Leads por Categoría")
+        st.subheader("Líderes por Categoría")
         cat_counts = filtered["Category"].value_counts().reset_index()
         cat_counts.columns = ["Categoría", "Cantidad"]
         fig_cat = px.pie(
@@ -215,7 +215,7 @@ with tab1:
         st.plotly_chart(fig_cat, use_container_width=True)
 
     with chart_col2:
-        st.subheader("Leads por Industria")
+        st.subheader("Líderes por Industria")
         ind_counts = filtered["Industry"].value_counts().reset_index()
         ind_counts.columns = ["Industria", "Cantidad"]
         fig_ind = px.pie(
@@ -228,7 +228,7 @@ with tab1:
         st.plotly_chart(fig_ind, use_container_width=True)
 
     # — Data table & download —
-    st.subheader("Detalles de Leads")
+    st.subheader("Detalles de Líderes")
     st.dataframe(
         filtered[[
             "First Name","Last Name","Category","Main Titles",
@@ -246,7 +246,7 @@ with tab1:
     st.download_button(
         label="Descargar Excel",
         data=output,
-        file_name="cesa_leads.xlsx",
+        file_name="cesa_leaders.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
