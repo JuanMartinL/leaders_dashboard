@@ -237,31 +237,59 @@ with tab2:
 
 with tab3:
     st.subheader("Matriz de Red: Conexiones entre Perfiles")
+    import networkx as nx
+    from pyvis.network import Network
+    import streamlit.components.v1 as components
 
-    # Limitar a los primeros 50 para rendimiento
-    subset = filtered.head(50)
+    # 1. Filtro de roles
+    all_roles = sorted({r for roles in filtered["Main Titles"] for r in roles})
+    sel_roles = st.multiselect("Filtrar por rol", options=all_roles, default=all_roles)
 
-    # Construir grafo
+    # Subset según roles seleccionados
+    sub = filtered[
+        filtered["Main Titles"].apply(lambda rl: any(r in rl for r in sel_roles))
+    ].reset_index(drop=True)
+
+    # 2. Construir grafo solo si más de 1 nodo
     G = nx.Graph()
-    for idx, row in subset.iterrows():
+    for i, row in sub.iterrows():
         name = f"{row['First Name']} {row['Last Name']}"
-        G.add_node(idx, label=name, title=name)
+        G.add_node(i, label=name)
 
-    # Añadir aristas si comparten algún Main Title
-    for i in subset.index:
-        for j in subset.index:
+    # 3. Crear aristas solo si comparten rol y ambos en sub
+    for i in G.nodes:
+        for j in G.nodes:
             if j <= i: continue
-            roles_i = set(subset.loc[i, 'Main Titles']) if isinstance(subset.loc[i, 'Main Titles'], list) else set()
-            roles_j = set(subset.loc[j, 'Main Titles']) if isinstance(subset.loc[j, 'Main Titles'], list) else set()
-            if roles_i & roles_j:
+            if set(sub.loc[i, "Main Titles"]) & set(sub.loc[j, "Main Titles"]):
                 G.add_edge(i, j)
 
-    # Generar red con PyVis
-    net = Network(height='600px', width='100%', notebook=False)
-    net.from_nx(G)
+    # 4. Filtrar nodos de bajo grado
+    min_deg = st.slider("Grado mínimo (conexiones)", 1, 10, 2)
+    low_deg = [n for n,d in G.degree() if d < min_deg]
+    G.remove_nodes_from(low_deg)
 
-    # Mostrar la red en HTML
-    path = 'network.html'
+    # 5. Detección de comunidades
+    from networkx.algorithms import community
+    communities = community.greedy_modularity_communities(G)
+    color_map = {}
+    palette = px.colors.qualitative.Plotly
+    for cid, comm in enumerate(communities):
+        for node in comm:
+            color_map[node] = palette[cid % len(palette)]
+
+    # 6. Crear red PyVis
+    net = Network(height="600px", width="100%", notebook=False)
+    net.barnes_hut()  # layout más limpio
+    for n, data in G.nodes(data=True):
+        net.add_node(n, label=data["label"], color=color_map.get(n, "#888"))
+    for u, v in G.edges():
+        net.add_edge(u, v)
+
+    # 7. Fijar física tras layout
+    net.toggle_physics(False)
+
+    # 8. Renderizar HTML
+    path = "network.html"
     net.write_html(path, open_browser=False)
-    with open(path, 'r', encoding='utf-8') as HtmlFile:
-        components.html(HtmlFile.read(), height=650)
+    with open(path, "r", encoding="utf-8") as f:
+        components.html(f.read(), height=650)
