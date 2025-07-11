@@ -9,6 +9,8 @@ from streamlit_folium import st_folium
 import networkx as nx
 from pyvis.network import Network
 from PIL import Image
+import base64
+from io import BytesIO
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
@@ -26,9 +28,16 @@ st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
 st.title("CESA • LATAM Leaders & Influencers")
 
 # Logos
-logo_cesa = Image.open("datain/cesa_logo.png")
-logo_datad = Image.open("datain/Logo.jpeg")
+# Cargar imágenes
+logo_cesa = Image.open("assets/cesa_logo.png")
+icon_datad = Image.open("assets/icon_datad.png")  # este es el nuevo ícono de DataD
 
+# Convertir ícono a base64 para insertarlo como imagen HTML
+buffered = BytesIO()
+icon_datad.save(buffered, format="PNG")
+icon_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+# HTML + CSS para mostrar logos sin espacio
 with st.sidebar:
     st.markdown("""
         <style>
@@ -43,23 +52,37 @@ with st.sidebar:
                 padding-top: 0rem;
                 padding-bottom: 0rem;
             }
-            .powered-text {
-                text-align: center;
+            .powered-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                margin-top: -8px;
                 font-size: 10px;
-                margin-top: -6px;
                 color: grey;
+            }
+            .powered-container img {
+                height: 14px;
+                width: 14px;
+                margin-bottom: -2px;
             }
         </style>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-    st.image(logo_cesa, use_container_width =True)
-    st.image(logo_datad, use_container_width =True)
+    st.image(logo_cesa, use_column_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="powered-text">Powered by DataD</div>', unsafe_allow_html=True)
-   
-   
+    st.markdown(
+        f"""
+        <div class="powered-container">
+            <img src="data:image/png;base64,{icon_base64}" />
+            <span>Powered by DataD</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
