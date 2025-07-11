@@ -30,9 +30,28 @@ logo_cesa = Image.open("datain/cesa_logo.png")      # Ruta relativa al archivo
 logo_datad = Image.open("datain/Logo.jpeg")
 
 with st.sidebar:
-    st.image(logo_cesa, use_container_width =True)
-    st.image(logo_datad, caption="Powered by DataD", use_container_width =True)
+    st.markdown("""
+        <style>
+            .logo-container img {
+                margin-bottom: 0px !important;
+                padding: 0px !important;
+                background: none !important;
+                border-radius: 0px !important;
+                box-shadow: none !important;
+            }
+            .css-1v0mbdj.e115fcil1 {
+                padding: 1rem 0.5rem 0.5rem 0.5rem;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
+    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+    st.image(logo_cesa, use_column_width=True)
+    
+    st.image(logo_datad, use_column_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown('<p style="text-align:center; font-size: 0.75rem; margin-top: 0.5rem; color: grey;">Powered by DataD</p>', unsafe_allow_html=True)
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
