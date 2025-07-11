@@ -13,6 +13,8 @@ from PIL import Image
 import base64
 from io import BytesIO
 
+show_network = False
+
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
     df = pd.read_excel(path)
@@ -90,7 +92,10 @@ with st.sidebar:
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["Estadísticas Generales", "Visor de Líderes", "Network"])
+if show_network:
+    tab1, tab2, tab3 = st.tabs(["Estadísticas Generales", "Visor de Líderes", "Network"])
+else:
+    tab1, tab2 = st.tabs(["Estadísticas Generales", "Visor de Líderes"])
 
 with tab1:
     st.markdown("**Explora y filtra los líderes** para programas, conferencias y alianzas.")
@@ -298,7 +303,7 @@ with tab2:
     st.markdown("---")
 
 
-show_network = False
+
 
 if show_network:
     with tab3:
