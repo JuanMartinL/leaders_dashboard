@@ -9,6 +9,7 @@ from streamlit_folium import st_folium
 import networkx as nx
 from pyvis.network import Network
 import streamlit.components.v1 as components
+from PIL import Image
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
@@ -21,18 +22,23 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
     return df
 
 leaders = load_data()
+logo_cesa = Image.open("assets/cesa_logo.png")  # Asegúrate que estén en esta carpeta
+logo_datad = Image.open("assets/Logo.jpeg")
 
 st.set_page_config(page_title="CESA Leadership Dashboard", layout="wide")
 st.title("CESA • LATAM Leaders & Influencers")
 
 # Header: Cliente (CESA) y Desarrollador (DataD)
-col_logo_cliente, col_title, col_logo_dev = st.columns([1,4,1])
-with col_logo_cliente:
-    st.image("cesa_logo.png", width=80)
-with col_title:
-    st.markdown("# CESA University • LATAM Leaders & Influencers")
-with col_logo_dev:
-    st.image("Logo.jpeg", width=80)
+col1, col2, col3 = st.columns([1, 3, 1])
+
+with col1:
+    st.image(logo_cesa, width=90)
+
+with col2:
+    st.markdown("<h1 style='text-align: center;'>Dashboard de Liderazgo Latinoamericano</h1>", unsafe_allow_html=True)
+
+with col3:
+    st.image(logo_datad, width=90)
 
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
