@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import ast
+import pydeck as pdk
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
@@ -14,6 +15,26 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
     return df
 
 leaders = load_data()
+
+# Ensure 'Country' is geocoded
+from geopy.geocoders import Nominatim
+geolocator = Nominatim(user_agent="cesa_map")
+import time
+
+@st.cache_data
+def geocode_country(country):
+    try:
+        location = geolocator.geocode(country)
+        time.sleep(1)  # avoid hitting API rate limit
+        return pd.Series([location.latitude, location.longitude])
+    except:
+        return pd.Series([None, None])
+
+# Add lat/lon columns if not exist
+if 'Latitude' not in leaders.columns or 'Longitude' not in leaders.columns:
+    coords = leaders['Country'].dropna().drop_duplicates().apply(geocode_country)
+    coords_df = pd.DataFrame(coords.tolist(), index=coords.index, columns=['Latitude', 'Longitude'])
+    leaders = leaders.merge(coords_df, left_on='Country', right_index=True, how='left')
 
 st.set_page_config(page_title="CESA Leads Dashboard", layout="wide")
 st.title("CESA University • LATAM Leaders & Influencers")
@@ -93,8 +114,32 @@ with tab1:
         ]],
         height=400
     )
-    csv = filtered.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Descargar CSV", data=csv, file_name="cesa_leads.csv")
+    xlsx_file = filtered.to_excel(index=False).encode("utf-8")
+    st.download_button("📥 Descargar Excel", data=xlsx_file, file_name="cesa_leads.xlsx")
+
+    st.subheader("🌍 Distribution Map")
+
+    map_df = leaders.dropna(subset=["Latitude", "Longitude"])
+
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/light-v9",
+        initial_view_state=pdk.ViewState(
+            latitude=map_df["Latitude"].mean(),
+            longitude=map_df["Longitude"].mean(),
+            zoom=3,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=map_df,
+                get_position='[Longitude, Latitude]',
+                get_radius=30000,
+                get_fill_color='[200, 30, 0, 160]',
+                pickable=True,
+            )
+        ],
+    ))
 
 with tab2:
     st.markdown("## 📇 CV Viewer")
