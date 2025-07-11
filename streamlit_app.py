@@ -58,11 +58,20 @@ with tab1:
     filtered = filter_df(leaders)
 
     # — Key metrics —
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total leads", len(filtered))
-    c2.metric("Categorías", filtered["Category"].nunique())
-    c3.metric("Industrias", filtered["Industry"].nunique())
-    c4.metric("Prom. seguidores", f"{int(filtered['Followers'].mean()):,}")
+    total_leads = len(filtered)
+    categories_count = filtered["Category"].nunique()
+    industries_count = filtered["Industry"].nunique()
+    mean_followers = filtered["Followers"].mean()
+
+    # Controlar NaN
+    followers_display = "0" if pd.isna(mean_followers) else f"{int(mean_followers):,}"
+
+    # Mostrar métricas
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total leads", total_leads)
+    col2.metric("Categorías", categories_count)
+    col3.metric("Industrias", industries_count)
+    col4.metric("Prom. seguidores", followers_display)
 
     # — Charts —
     st.subheader("Distribución por País")
