@@ -236,57 +236,62 @@ with tab2:
     st.markdown("---")
 
 with tab3:
-    st.subheader("Matriz de Red: Conexiones entre Perfiles")
+    st.subheader("Matriz de Red: Top Conectados")
 
-    # 1. Filtro de roles
-    all_roles = sorted({r for roles in filtered["Main Titles"] for r in roles})
-    sel_roles = st.multiselect("Filtrar por rol", options=all_roles, default=all_roles)
+    import networkx as nx
+    from pyvis.network import Network
+    import streamlit.components.v1 as components
+    from itertools import combinations
+    from collections import defaultdict
 
-    # Subset según roles seleccionados
-    sub = filtered[
-        filtered["Main Titles"].apply(lambda rl: any(r in rl for r in sel_roles))
-    ].reset_index(drop=True)
+    # Preparar nodos
+    sub = filtered.copy()
+    sub["Full Name"] = sub["First Name"] + " " + sub["Last Name"]
+    sub = sub.dropna(subset=["Main Titles"])
+    sub = sub.reset_index(drop=True)
 
-    # 2. Construir grafo solo si más de 1 nodo
+    # Construir red de co-ocurrencia por rol
+    edges = defaultdict(int)
+    name_roles = list(zip(sub["Full Name"], sub["Main Titles"]))
+    for (name1, roles1), (name2, roles2) in combinations(name_roles, 2):
+        if set(roles1) & set(roles2):
+            edges[(name1, name2)] += 1
+
+    # Crear grafo
     G = nx.Graph()
-    for i, row in sub.iterrows():
-        name = f"{row['First Name']} {row['Last Name']}"
-        G.add_node(i, label=name)
+    for name in sub["Full Name"]:
+        G.add_node(name)
+    for (n1, n2), w in edges.items():
+        G.add_edge(n1, n2, weight=w)
 
-    # 3. Crear aristas solo si comparten rol y ambos en sub
-    for i in G.nodes:
-        for j in G.nodes:
-            if j <= i: continue
-            if set(sub.loc[i, "Main Titles"]) & set(sub.loc[j, "Main Titles"]):
-                G.add_edge(i, j)
+    # Filtrar top N por centralidad
+    deg = nx.degree_centrality(G)
+    top_n = 50
+    top_nodes = sorted(deg, key=deg.get, reverse=True)[:top_n]
+    G = G.subgraph(top_nodes).copy()
 
-    # 4. Filtrar nodos de bajo grado
-    min_deg = st.slider("Grado mínimo (conexiones)", 1, 10, 2)
-    low_deg = [n for n,d in G.degree() if d < min_deg]
-    G.remove_nodes_from(low_deg)
-
-    # 5. Detección de comunidades
-    from networkx.algorithms import community
-    communities = community.greedy_modularity_communities(G)
-    color_map = {}
-    palette = px.colors.qualitative.Plotly
-    for cid, comm in enumerate(communities):
-        for node in comm:
-            color_map[node] = palette[cid % len(palette)]
-
-    # 6. Crear red PyVis
+    # Crear red PyVis
     net = Network(height="600px", width="100%", notebook=False)
-    net.barnes_hut()  # layout más limpio
-    for n, data in G.nodes(data=True):
-        net.add_node(n, label=data["label"], color=color_map.get(n, "#888"))
-    for u, v in G.edges():
-        net.add_edge(u, v)
+    net.set_options("""
+        var options = {
+          physics: {
+            repulsion: {
+              centralGravity: 0.1,
+              springLength: 100,
+              springConstant: 0.01,
+              nodeDistance: 200,
+              damping: 0.1
+            },
+            solver: 'repulsion'
+          }
+        }
+    """)
+    for n in G.nodes:
+        net.add_node(n, label=n)
+    for u, v, d in G.edges(data=True):
+        net.add_edge(u, v, value=d["weight"])
 
-    # 7. Fijar física tras layout
-    net.toggle_physics(False)
-
-    # 8. Renderizar HTML
-    path = "network.html"
-    net.write_html(path, open_browser=False)
-    with open(path, "r", encoding="utf-8") as f:
-        components.html(f.read(), height=650)
+    # Exportar y mostrar
+    net.write_html("network.html")
+    with open("network.html", "r", encoding="utf-8") as f:
+        components.html(f.read(), height=600)
