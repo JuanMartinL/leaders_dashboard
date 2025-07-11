@@ -25,7 +25,7 @@ st.title("CESA University • LATAM Leaders & Influencers")
 # ---------------------------------------------------
 # Create two tabs: Dashboard & CV Viewer
 # ---------------------------------------------------
-tab1, tab2 = st.tabs(["Dashboard", "CV Viewer"])
+tab1, tab2 = st.tabs(["Estadísticas Generales", "Visor de Líderes"])
 
 with tab1:
     st.markdown("**Explora y filtra tus leads** para programas, conferencias y alianzas.")
@@ -81,9 +81,6 @@ with tab1:
     df_ctry.columns = ["País","Cantidad"]
     st.plotly_chart(px.bar(df_ctry, x="País", y="Cantidad", text="Cantidad"), use_container_width=True)
 
-    # Map
-    st.subheader("Distribución Geográfica")
-
     map_df = leaders.dropna(subset=["Latitude", "Longitude"])
 
     # Create Folium map centered on average lat/lon
@@ -103,9 +100,6 @@ with tab1:
             fill_opacity=0.7,
             popup=f"{row['First Name']} {row['Last Name']}"
         ).add_to(m)
-
-    # Render map in Streamlit
-    st.subheader("Distribución Geográfica (Bubble Map por País)")
 
     # Use the already-filtered DataFrame
     map_df = filtered.dropna(subset=["Latitude", "Longitude"])
@@ -138,12 +132,32 @@ with tab1:
     # Display map in full width
     st_folium(m, width="100%", height=500)
 
-    # Leads por categoria
+    # Donut chart: Categories
     st.subheader("Leads por Categoría")
-    df_cat = filtered["Category"].value_counts().reset_index()
-    df_cat.columns = ["Categoría","Cantidad"]
-    st.plotly_chart(px.pie(df_cat, names="Categoría", values="Cantidad"), use_container_width=True)
+    cat_counts = filtered["Category"].value_counts().reset_index()
+    cat_counts.columns = ["Categoría", "Cantidad"]
+    fig_cat = px.pie(
+        cat_counts,
+        names="Categoría",
+        values="Cantidad",
+        hole=0.4,
+        title=None
+    )
+    st.plotly_chart(fig_cat, use_container_width=True)
 
+    # Donut chart: Industries
+    st.subheader("Leads por Industria")
+    ind_counts = filtered["Industry"].value_counts().reset_index()
+    ind_counts.columns = ["Industria", "Cantidad"]
+    fig_ind = px.pie(
+        ind_counts,
+        names="Industria",
+        values="Cantidad",
+        hole=0.4,
+        title=None
+    )
+    
+    st.plotly_chart(fig_ind, use_container_width=True)
     # — Data table & download —
     st.subheader("Detalles de Leads")
     st.dataframe(
