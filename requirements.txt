@@ -5,3 +5,4 @@ streamlit-folium
 plotly
 openpyxl
 pydeck
+geopy
