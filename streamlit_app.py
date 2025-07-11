@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import ast
 import pydeck as pdk
+import io
 
 @st.cache_data
 def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
@@ -95,8 +96,23 @@ with tab1:
         ]],
         height=400
     )
-    xlsx_file = filtered.to_excel(index = False)
-    st.download_button("📥 Descargar Excel", data=xlsx_file, file_name="cesa_leads.xlsx")
+    # Create a BytesIO buffer
+    output = io.BytesIO()
+
+    # Write the DataFrame to this buffer as Excel
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        filtered.to_excel(writer, index=False)
+
+    # Rewind the buffer
+    output.seek(0)
+
+    # Download button
+    st.download_button(
+        label="Descargar Excel",
+        data=output,
+        file_name="cesa_leads.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
     st.subheader("🌍 Distribution Map")
 
@@ -123,7 +139,7 @@ with tab1:
     ))
 
 with tab2:
-    st.markdown("## 📇 CV Viewer")
+    st.markdown("## Viewer")
     st.markdown("Selecciona un lead para ver su perfil completo y decidir su pertinencia para conferencias, programas académicos o alianzas.")
 
     # Select person
