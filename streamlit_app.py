@@ -133,34 +133,34 @@ with tab1:
     st_folium(m, width="100%", height=500)
 
     # Donut charts side by side
-chart_col1, chart_col2 = st.columns(2)
+    chart_col1, chart_col2 = st.columns(2)
 
-# Donut Charts
-with chart_col1:
-    st.subheader("Leads por Categoría")
-    cat_counts = filtered["Category"].value_counts().reset_index()
-    cat_counts.columns = ["Categoría", "Cantidad"]
-    fig_cat = px.pie(
-        cat_counts,
-        names="Categoría",
-        values="Cantidad",
-        hole=0.4,
-        title=None
-    )
-    st.plotly_chart(fig_cat, use_container_width=True)
+    # Donut Charts
+    with chart_col1:
+        st.subheader("Leads por Categoría")
+        cat_counts = filtered["Category"].value_counts().reset_index()
+        cat_counts.columns = ["Categoría", "Cantidad"]
+        fig_cat = px.pie(
+            cat_counts,
+            names="Categoría",
+            values="Cantidad",
+            hole=0.4,
+            title=None
+        )
+        st.plotly_chart(fig_cat, use_container_width=True)
 
-with chart_col2:
-    st.subheader("Leads por Industria")
-    ind_counts = filtered["Industry"].value_counts().reset_index()
-    ind_counts.columns = ["Industria", "Cantidad"]
-    fig_ind = px.pie(
-        ind_counts,
-        names="Industria",
-        values="Cantidad",
-        hole=0.4,
-        title=None
-    )
-    st.plotly_chart(fig_ind, use_container_width=True)
+    with chart_col2:
+        st.subheader("Leads por Industria")
+        ind_counts = filtered["Industry"].value_counts().reset_index()
+        ind_counts.columns = ["Industria", "Cantidad"]
+        fig_ind = px.pie(
+            ind_counts,
+            names="Industria",
+            values="Cantidad",
+            hole=0.4,
+            title=None
+        )
+        st.plotly_chart(fig_ind, use_container_width=True)
 
     # — Data table & download —
     st.subheader("Detalles de Leads")
