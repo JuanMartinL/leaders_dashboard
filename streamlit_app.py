@@ -9,7 +9,6 @@ from streamlit_folium import st_folium
 import networkx as nx
 import streamlit.components.v1 as components
 from pyvis.network import Network
-import components
 from PIL import Image
 import base64
 from io import BytesIO
