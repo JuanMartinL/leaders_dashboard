@@ -16,25 +16,6 @@ def load_data(path: str = "datain/scrap_leaders.xlsx") -> pd.DataFrame:
 
 leaders = load_data()
 
-# Ensure 'Country' is geocoded
-from geopy.geocoders import Nominatim
-geolocator = Nominatim(user_agent="cesa_map")
-import time
-
-@st.cache_data
-def geocode_country(country):
-    try:
-        location = geolocator.geocode(country)
-        time.sleep(1)  # avoid hitting API rate limit
-        return pd.Series([location.latitude, location.longitude])
-    except:
-        return pd.Series([None, None])
-
-# Add lat/lon columns if not exist
-if 'Latitude' not in leaders.columns or 'Longitude' not in leaders.columns:
-    coords = leaders['Country'].dropna().drop_duplicates().apply(geocode_country)
-    coords_df = pd.DataFrame(coords.tolist(), index=coords.index, columns=['Latitude', 'Longitude'])
-    leaders = leaders.merge(coords_df, left_on='Country', right_index=True, how='left')
 
 st.set_page_config(page_title="CESA Leads Dashboard", layout="wide")
 st.title("CESA University • LATAM Leaders & Influencers")
@@ -114,7 +95,7 @@ with tab1:
         ]],
         height=400
     )
-    xlsx_file = filtered.to_excel(index=False).encode("utf-8")
+    xlsx_file = filtered.to_excel(index = False)
     st.download_button("📥 Descargar Excel", data=xlsx_file, file_name="cesa_leads.xlsx")
 
     st.subheader("🌍 Distribution Map")
